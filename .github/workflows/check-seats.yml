@@ -34,4 +34,5 @@ jobs:
           git config user.email "seat-bot@users.noreply.github.com"
           git add seat_log.csv dashboard.html state.json
           git diff --staged --quiet || git commit -m "seat log update"
+          git pull --rebase origin main
           git push
