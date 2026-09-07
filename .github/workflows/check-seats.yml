@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: seat-check
+  cancel-in-progress: false
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -34,5 +38,8 @@ jobs:
           git config user.email "seat-bot@users.noreply.github.com"
           git add seat_log.csv dashboard.html state.json
           git diff --staged --quiet || git commit -m "seat log update"
-          git pull --rebase origin main
-          git push
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && break
+            echo "push 재시도 ($i)..."
+            sleep 5
+          done
