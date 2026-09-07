@@ -2,8 +2,8 @@ name: 좌석 현황 체크
 
 on:
   schedule:
-    # KST 08~18시(정시) = UTC 23(전날),00~09시
-    - cron: "0 23,0-9 * * *"
+    # 테스트용: 5분마다 (정상 작동 확인되면 원래 스케줄로 되돌릴 예정)
+    - cron: "*/5 * * * *"
   workflow_dispatch: {}   # 수동 실행 버튼도 사용 가능
 
 permissions:
