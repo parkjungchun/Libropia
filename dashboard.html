@@ -15,20 +15,20 @@
 </head>
 <body>
   <h1>제1열람실 이용가능 좌석수 (오늘)</h1>
-  <p class="updated">마지막 갱신: 2026-09-07 17:30:37</p>
+  <p class="updated">마지막 갱신: 2026-09-07 17:45:27</p>
   <canvas id="chart" height="220"></canvas>
   <table>
     <tr><th>시간</th><th>전체</th><th>이용중</th><th>이용가능</th></tr>
-    <tr><td>02:49</td><td>59</td><td>56</td><td>0</td></tr><tr><td>03:05</td><td>59</td><td>56</td><td>0</td></tr><tr><td>12:08</td><td>59</td><td>56</td><td>0</td></tr><tr><td>12:11</td><td>59</td><td>56</td><td>0</td></tr><tr><td>13:30</td><td>59</td><td>56</td><td>0</td></tr><tr><td>13:55</td><td>59</td><td>56</td><td>0</td></tr><tr><td>13:58</td><td>59</td><td>56</td><td>0</td></tr><tr><td>13:59</td><td>59</td><td>56</td><td>0</td></tr><tr><td>14:00</td><td>59</td><td>56</td><td>0</td></tr><tr><td>14:01</td><td>59</td><td>56</td><td>0</td></tr><tr><td>14:06</td><td>59</td><td>56</td><td>0</td></tr><tr><td>14:08</td><td>59</td><td>56</td><td>0</td></tr><tr><td>14:09</td><td>59</td><td>56</td><td>0</td></tr><tr><td>14:30</td><td>59</td><td>56</td><td>0</td></tr><tr><td>15:00</td><td>59</td><td>55</td><td>1</td></tr><tr><td>15:30</td><td>59</td><td>55</td><td>1</td></tr><tr><td>15:45</td><td>59</td><td>55</td><td>1</td></tr><tr><td>16:00</td><td>59</td><td>56</td><td>0</td></tr><tr><td>16:15</td><td>59</td><td>53</td><td>3</td></tr><tr><td>16:30</td><td>59</td><td>52</td><td>4</td></tr><tr><td>16:45</td><td>59</td><td>52</td><td>4</td></tr><tr><td>17:00</td><td>59</td><td>45</td><td>11</td></tr><tr><td>17:15</td><td>59</td><td>43</td><td>13</td></tr><tr><td>17:30</td><td>59</td><td>43</td><td>13</td></tr>
+    <tr><td>02:49</td><td>59</td><td>56</td><td>0</td></tr><tr><td>03:05</td><td>59</td><td>56</td><td>0</td></tr><tr><td>12:08</td><td>59</td><td>56</td><td>0</td></tr><tr><td>12:11</td><td>59</td><td>56</td><td>0</td></tr><tr><td>13:30</td><td>59</td><td>56</td><td>0</td></tr><tr><td>13:55</td><td>59</td><td>56</td><td>0</td></tr><tr><td>13:58</td><td>59</td><td>56</td><td>0</td></tr><tr><td>13:59</td><td>59</td><td>56</td><td>0</td></tr><tr><td>14:00</td><td>59</td><td>56</td><td>0</td></tr><tr><td>14:01</td><td>59</td><td>56</td><td>0</td></tr><tr><td>14:06</td><td>59</td><td>56</td><td>0</td></tr><tr><td>14:08</td><td>59</td><td>56</td><td>0</td></tr><tr><td>14:09</td><td>59</td><td>56</td><td>0</td></tr><tr><td>14:30</td><td>59</td><td>56</td><td>0</td></tr><tr><td>15:00</td><td>59</td><td>55</td><td>1</td></tr><tr><td>15:30</td><td>59</td><td>55</td><td>1</td></tr><tr><td>15:45</td><td>59</td><td>55</td><td>1</td></tr><tr><td>16:00</td><td>59</td><td>56</td><td>0</td></tr><tr><td>16:15</td><td>59</td><td>53</td><td>3</td></tr><tr><td>16:30</td><td>59</td><td>52</td><td>4</td></tr><tr><td>16:45</td><td>59</td><td>52</td><td>4</td></tr><tr><td>17:00</td><td>59</td><td>45</td><td>11</td></tr><tr><td>17:15</td><td>59</td><td>43</td><td>13</td></tr><tr><td>17:30</td><td>59</td><td>43</td><td>13</td></tr><tr><td>17:45</td><td>59</td><td>44</td><td>12</td></tr>
   </table>
   <script>
     new Chart(document.getElementById('chart'), {
       type: 'line',
       data: {
-        labels: ['02:49', '03:05', '12:08', '12:11', '13:30', '13:55', '13:58', '13:59', '14:00', '14:01', '14:06', '14:08', '14:09', '14:30', '15:00', '15:30', '15:45', '16:00', '16:15', '16:30', '16:45', '17:00', '17:15', '17:30'],
+        labels: ['02:49', '03:05', '12:08', '12:11', '13:30', '13:55', '13:58', '13:59', '14:00', '14:01', '14:06', '14:08', '14:09', '14:30', '15:00', '15:30', '15:45', '16:00', '16:15', '16:30', '16:45', '17:00', '17:15', '17:30', '17:45'],
         datasets: [{
           label: '이용가능 좌석수',
-          data: ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '0', '3', '4', '4', '11', '13', '13'],
+          data: ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '0', '3', '4', '4', '11', '13', '13', '12'],
           borderColor: '#2b8a3e',
           backgroundColor: 'rgba(43,138,62,0.15)',
           fill: true,
