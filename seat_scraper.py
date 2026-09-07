@@ -12,8 +12,8 @@
 
 동작 방식:
   - 메시지마다 "🔕 그만 받기" 버튼이 붙어서 나갑니다.
-  - 버튼을 누르면 그 순간부터 알림이 중지됩니다 (응답 안 하면 계속 받는 게 기본값).
-  - 다시 받고 싶으면 봇에게 "x" 라고 메시지를 보내면 재개됩니다.
+  - 버튼을 누르면 그 순간부터 알림이 중지되고, "▶️ 다시 받고싶어요" 버튼이 있는 메시지가 옵니다.
+  - 그 버튼을 누르면 알림이 재개됩니다 (응답 안 하면 계속 받는 게 기본값).
   - 이 상태(중지 여부)는 state.json에 저장되고, 실행할 때마다 커밋되어 유지됩니다.
 
 필요 패키지: pip install requests beautifulsoup4
@@ -25,9 +25,17 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import requests
 from bs4 import BeautifulSoup
+
+KST = ZoneInfo("Asia/Seoul")
+
+
+def now_kst():
+    return datetime.now(KST)
+
 
 # ---- 설정 ----
 SEAT_URL = "http://118.223.243.11:8800/SeatMate3/SeatMate.php?classInfo=1"  # 제1열람실
@@ -78,14 +86,14 @@ def append_log(total, using, available):
         if is_new:
             writer.writerow(["timestamp", "room", "total", "using", "available"])
         writer.writerow(
-            [datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ROOM_NAME, total, using, available]
+            [now_kst().strftime("%Y-%m-%d %H:%M:%S"), ROOM_NAME, total, using, available]
         )
 
 
 def read_today_log():
     if not LOG_FILE.exists():
         return []
-    today = datetime.now().strftime("%Y-%m-%d")
+    today = now_kst().strftime("%Y-%m-%d")
     rows = []
     with LOG_FILE.open(encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
@@ -122,7 +130,7 @@ def build_dashboard():
 </head>
 <body>
   <h1>{ROOM_NAME} 이용가능 좌석수 (오늘)</h1>
-  <p class="updated">마지막 갱신: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+  <p class="updated">마지막 갱신: {now_kst().strftime('%Y-%m-%d %H:%M:%S')}</p>
   <canvas id="chart" height="220"></canvas>
   <table>
     <tr><th>시간</th><th>전체</th><th>이용중</th><th>이용가능</th></tr>
@@ -213,7 +221,7 @@ def send_telegram(total, using, available):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         print("텔레그램 설정(TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID)이 없어 알림을 건너뜁니다.")
         return
-    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    now = now_kst().strftime("%Y-%m-%d %H:%M")
     text = (
         f"📚 {ROOM_NAME} 좌석 현황 ({now})\n"
         f"전체 {total} / 이용중 {using} / 이용가능 {available}"
@@ -244,7 +252,7 @@ def main():
     build_dashboard()
     send_telegram(total, using, available)
     save_state(state)
-    print(f"[{datetime.now():%H:%M}] {ROOM_NAME} 전체 {total} / 이용중 {using} / 이용가능 {available}")
+    print(f"[{now_kst():%H:%M}] {ROOM_NAME} 전체 {total} / 이용중 {using} / 이용가능 {available}")
 
 
 if __name__ == "__main__":
