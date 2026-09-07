@@ -2,8 +2,8 @@ name: 좌석 현황 체크
 
 on:
   schedule:
-    # KST 08,09,10,11,12시 = UTC 23(전날),00,01,02,03시
-    - cron: "0 23,0,1,2,3 * * *"
+    # KST 08~18시(정시) = UTC 23(전날),00~09시
+    - cron: "0 23,0-9 * * *"
   workflow_dispatch: {}   # 수동 실행 버튼도 사용 가능
 
 permissions:
