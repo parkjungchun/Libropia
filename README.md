@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/31893858/README.md)
 # 내손도서관 제1열람실 좌석 현황 자동 알림 (GitHub Actions + 텔레그램)
 
 내 컴퓨터를 켜둘 필요 없이, GitHub이 클라우드에서 매시간 자동으로
@@ -30,9 +29,34 @@
 - 실행할 때마다 seat_log.csv에 기록이 쌓이고, dashboard.html도 저장소에 갱신되어
   (GitHub Pages를 켜면) 웹페이지로도 볼 수 있습니다.
 
-## 알림 끄고 켜기
-- 메시지마다 "🔕 그만 받기" 버튼이 같이 와요. 누르면 그 다음부터 알림이 안 옵니다 (안 누르면 계속 받는 게 기본).
-- 누르면 "▶️ 다시 받고싶어요" 버튼이 있는 메시지가 하나 오는데, 그 버튼을 누르면 알림이 재개됩니다.
+## 알림 끄고 켜기 (즉시 반응 - 웹훅 방식)
+"🔕 그만 받기" / "▶️ 다시 받고싶어요" 버튼을 누르면 **그 즉시** 반응하도록
+Cloudflare Workers(무료)로 작은 웹훅 서버를 하나 둡니다.
+
+### 1. GitHub 토큰에 Contents 권한 추가
+cron-job.org용으로 만든 토큰을 재사용합니다.
+- 깃허브 → Settings → Developer settings → Personal access tokens → 그 토큰 클릭
+- Permissions → **Repository permissions**에서 **Contents: Read and write** 추가
+- Update
+
+### 2. Cloudflare Worker 만들기
+1. cloudflare.com 무료 가입 → 대시보드 → **Workers & Pages** → **Create** → **Create Worker**
+2. 이름 아무거나 정하고 배포(Deploy)
+3. 생성된 Worker 편집 화면에서 기본 코드를 지우고 `telegram-webhook-worker.js` 내용을 통째로 붙여넣기 → **Deploy**
+4. Worker 설정(Settings) → **Variables and Secrets**에서 아래 3개 등록:
+   - `TELEGRAM_BOT_TOKEN` : 텔레그램 봇 토큰
+   - `GITHUB_TOKEN` : 1번에서 권한 추가한 그 토큰
+   - `GITHUB_REPO` : `parkjungchun/Libropia` 형식
+5. Worker 고유 주소(예: `https://xxx.workers.dev`)를 복사해두기
+
+### 3. 텔레그램에 웹훅 등록
+브라우저 주소창에 아래처럼 입력 (TOKEN과 WORKER_URL을 실제 값으로 교체):
+```
+https://api.telegram.org/bot<TOKEN>/setWebhook?url=<WORKER_URL>
+```
+`{"ok":true,"result":true,...}` 가 나오면 성공.
+
+이제부터 버튼을 누르면 즉시 반응하고, 좌석 확인 자체는 여전히 cron-job.org 스케줄대로 옵니다.
 
 ## 참고
 - 무료 GitHub 계정의 Actions 무료 사용량 내에서 충분히 동작합니다 (하루 5회, 몇 초씩).

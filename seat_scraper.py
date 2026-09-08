@@ -3,8 +3,7 @@
 --------------------------------------------------------------------------
 - SeatMate3 페이지에서 현재 좌석 현황을 읽어와 텔레그램으로 알림을 보내고,
   seat_log.csv에 기록을 남기고, dashboard.html도 갱신합니다.
-- 실행 자체는 GitHub Actions가 클라우드에서 스케줄대로 자동 실행해줘서
-  내 컴퓨터를 켜둘 필요가 없습니다. (.github/workflows/check-seats.yml 참고)
+- 실행 자체는 cron-job.org(외부)가 정해진 시간마다 이 워크플로우를 깨워서 돌립니다.
 
 필요한 값 (GitHub 저장소 Secrets에 등록):
   TELEGRAM_BOT_TOKEN : 텔레그램 봇 토큰
@@ -12,9 +11,11 @@
 
 동작 방식:
   - 메시지마다 "🔕 그만 받기" 버튼이 붙어서 나갑니다.
-  - 버튼을 누르면 그 순간부터 알림이 중지되고, "▶️ 다시 받고싶어요" 버튼이 있는 메시지가 옵니다.
-  - 그 버튼을 누르면 알림이 재개됩니다 (응답 안 하면 계속 받는 게 기본값).
-  - 이 상태(중지 여부)는 state.json에 저장되고, 실행할 때마다 커밋되어 유지됩니다.
+  - 버튼을 누르면 Cloudflare Worker(웹훅)가 즉시 반응해서 state.json의
+    paused 값을 true로 바꾸고, "▶️ 다시 받고싶어요" 버튼이 있는 메시지를 보냅니다.
+  - 그 버튼을 누르면 즉시 paused가 false로 바뀌며 알림이 재개됩니다.
+  - 이 스크립트(main)는 실행될 때마다 state.json의 paused 값만 확인해서,
+    중지 상태면 아무 것도 안 하고 조용히 끝납니다.
 
 필요 패키지: pip install requests beautifulsoup4
 """
@@ -57,9 +58,6 @@ def fetch_seat_counts():
     soup = BeautifulSoup(resp.text, "html.parser")
 
     def last_number_after(img_keyword):
-        # img src에 img_keyword가 포함된 태그 뒤에 나오는 '숫자만 있는' 텍스트를 찾는다.
-        # 상단 범례 아이콘에는 숫자가 없고, 실제 데이터 영역 아이콘 뒤에만 숫자가 붙어있어서
-        # 여러 개가 잡히면 마지막 값(실제 데이터)을 사용한다.
         candidates = []
         for img in soup.find_all("img", src=re.compile(img_keyword, re.I)):
             for sib in img.find_all_next(limit=6):
@@ -158,63 +156,14 @@ def build_dashboard():
     DASHBOARD_FILE.write_text(html, encoding="utf-8")
 
 
-def load_state():
-    if STATE_FILE.exists():
-        return json.loads(STATE_FILE.read_text(encoding="utf-8"))
-    return {"offset": 0, "paused": False}
-
-
-def save_state(state):
-    STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-def sync_pause_state(state):
-    """봇에게 온 새 메시지/버튼 클릭을 확인해서 중지/재개 상태를 갱신한다."""
-    if not TELEGRAM_BOT_TOKEN:
-        return state
-    resp = requests.get(
-        f"{API_BASE}/getUpdates", params={"offset": state["offset"], "timeout": 0}, timeout=10
-    )
-    updates = resp.json().get("result", [])
-
-    for update in updates:
-        state["offset"] = update["update_id"] + 1
-
-        callback = update.get("callback_query")
-        if callback and callback.get("data") == "stop":
-            state["paused"] = True
-            requests.post(
-                f"{API_BASE}/answerCallbackQuery",
-                data={"callback_query_id": callback["id"], "text": "알림을 중지했어요."},
-                timeout=10,
-            )
-            resume_markup = {
-                "inline_keyboard": [[{"text": "▶️ 다시 받고싶어요", "callback_data": "resume"}]]
-            }
-            requests.post(
-                f"{API_BASE}/sendMessage",
-                data={
-                    "chat_id": TELEGRAM_CHAT_ID,
-                    "text": "알림을 중지했어요. 다시 받고 싶을 때 아래 버튼을 눌러주세요.",
-                    "reply_markup": json.dumps(resume_markup),
-                },
-                timeout=10,
-            )
-
-        if callback and callback.get("data") == "resume":
-            state["paused"] = False
-            requests.post(
-                f"{API_BASE}/answerCallbackQuery",
-                data={"callback_query_id": callback["id"], "text": "알림을 다시 시작할게요."},
-                timeout=10,
-            )
-            requests.post(
-                f"{API_BASE}/sendMessage",
-                data={"chat_id": TELEGRAM_CHAT_ID, "text": "알림을 다시 시작할게요."},
-                timeout=10,
-            )
-
-    return state
+def is_paused():
+    if not STATE_FILE.exists():
+        return False
+    try:
+        state = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return False
+    return bool(state.get("paused", False))
 
 
 def send_telegram(total, using, available):
@@ -239,19 +188,14 @@ def send_telegram(total, using, available):
 
 
 def main():
-    state = load_state()
-    state = sync_pause_state(state)  # 그 사이 온 버튼클릭/‘x’ 메시지 먼저 반영
-
-    if state["paused"]:
-        print("알림이 중지된 상태입니다. ('x' 메시지를 보내면 재개됩니다)")
-        save_state(state)
+    if is_paused():
+        print("알림이 중지된 상태입니다. (텔레그램에서 '▶️ 다시 받고싶어요' 버튼을 누르면 재개됩니다)")
         return
 
     total, using, available = fetch_seat_counts()
     append_log(total, using, available)
     build_dashboard()
     send_telegram(total, using, available)
-    save_state(state)
     print(f"[{now_kst():%H:%M}] {ROOM_NAME} 전체 {total} / 이용중 {using} / 이용가능 {available}")
 
 
