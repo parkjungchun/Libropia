@@ -15,20 +15,20 @@
 </head>
 <body>
   <h1>제1열람실 이용가능 좌석수 (오늘)</h1>
-  <p class="updated">마지막 갱신: 2026-09-18 11:00:37</p>
+  <p class="updated">마지막 갱신: 2026-09-21 10:45:26</p>
   <canvas id="chart" height="220"></canvas>
   <table>
     <tr><th>시간</th><th>전체</th><th>이용중</th><th>이용가능</th></tr>
-    <tr><td>11:00</td><td>59</td><td>0</td><td>56</td></tr>
+    <tr><td>10:45</td><td>59</td><td>55</td><td>1</td></tr>
   </table>
   <script>
     new Chart(document.getElementById('chart'), {
       type: 'line',
       data: {
-        labels: ['11:00'],
+        labels: ['10:45'],
         datasets: [{
           label: '이용가능 좌석수',
-          data: ['56'],
+          data: ['1'],
           borderColor: '#2b8a3e',
           backgroundColor: 'rgba(43,138,62,0.15)',
           fill: true,
