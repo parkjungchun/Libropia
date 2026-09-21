@@ -15,20 +15,20 @@
 </head>
 <body>
   <h1>제1열람실 이용가능 좌석수 (오늘)</h1>
-  <p class="updated">마지막 갱신: 2026-09-21 12:00:44</p>
+  <p class="updated">마지막 갱신: 2026-09-21 12:15:25</p>
   <canvas id="chart" height="220"></canvas>
   <table>
     <tr><th>시간</th><th>전체</th><th>이용중</th><th>이용가능</th></tr>
-    <tr><td>10:45</td><td>59</td><td>55</td><td>1</td></tr><tr><td>11:01</td><td>59</td><td>56</td><td>0</td></tr><tr><td>11:45</td><td>59</td><td>55</td><td>1</td></tr><tr><td>12:00</td><td>59</td><td>56</td><td>0</td></tr>
+    <tr><td>10:45</td><td>59</td><td>55</td><td>1</td></tr><tr><td>11:01</td><td>59</td><td>56</td><td>0</td></tr><tr><td>11:45</td><td>59</td><td>55</td><td>1</td></tr><tr><td>12:00</td><td>59</td><td>56</td><td>0</td></tr><tr><td>12:15</td><td>59</td><td>55</td><td>1</td></tr>
   </table>
   <script>
     new Chart(document.getElementById('chart'), {
       type: 'line',
       data: {
-        labels: ['10:45', '11:01', '11:45', '12:00'],
+        labels: ['10:45', '11:01', '11:45', '12:00', '12:15'],
         datasets: [{
           label: '이용가능 좌석수',
-          data: ['1', '0', '1', '0'],
+          data: ['1', '0', '1', '0', '1'],
           borderColor: '#2b8a3e',
           backgroundColor: 'rgba(43,138,62,0.15)',
           fill: true,
